@@ -85,8 +85,10 @@ func main() {
 						log.Println("Command Failed. Found \"" + Trigger + "\"")
 					}
 					if OptAbort {
-						cmd.Process.Kill() // abort the running command
-						os.Exit(1)
+						if !done {
+							cmd.Process.Kill() // abort the running command
+						}
+						done = true
 					}
 				}
 			}
@@ -99,8 +101,10 @@ func main() {
 						log.Println("Command Failed. Found \"" + Trigger + "\"")
 					}
 					if OptAbort {
-						cmd.Process.Kill() // abort the running command
-						os.Exit(1)
+						if !done {
+							cmd.Process.Kill() // abort the running command
+						}
+						done = true
 					}
 				}
 			}
