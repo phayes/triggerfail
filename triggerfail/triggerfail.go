@@ -6,14 +6,14 @@ import (
 	"strings"
 )
 
-// Run a command, checking if triggers were found in it's output
-// It returns a list of triggers found in the stdout and stderr of the running command
+// Run a command, checking if triggers were found in it's output.
+// It returns a list of triggers found in the stdout and stderr of the running command.
 // This command takes the following arguments:
-//   - *exec.Cmd - a pointer to an exec.Cmd (usually created by the exec.Command func). It can be configured as usual with the exception of stdin and stdout which should be left as is.
-//   - []string  - A list of trigger strings. The command will be failed if it's stdout or stderr contains these strings.
-//   - io.Writer - After consuming the stdout of the command to check for triggers, we pass along the results to this writer. Usually it would be set to os.Stdout or os.DevNull
-//   - io.Writer - After consuming the stderr of the command to check for triggers, we pass along the results to this writer. Usually it would be set to os.Stderr or os.DevNull
-//   - bool      - Abort the running commmand if a trigger word is found. If set to false the command will be allowed to run to completion, even with triggers.
+//   *exec.Cmd - a pointer to an exec.Cmd (usually created by the exec.Command func). It can be configured as usual with the exception of stdin and stdout which should be left as is.
+//   []string  - A list of trigger strings. The command will be failed if it's stdout or stderr contains these strings.
+//   io.Writer - After consuming the stdout of the command to check for triggers, we pass along the results to this writer. Usually it would be set to os.Stdout or os.DevNull
+//   io.Writer - After consuming the stderr of the command to check for triggers, we pass along the results to this writer. Usually it would be set to os.Stderr or os.DevNull
+//   bool      - Abort the running commmand if a trigger word is found. If set to false the command will be allowed to run to completion, even with triggers.
 func RunCommand(cmd *exec.Cmd, triggers []string, stdout io.Writer, stderr io.Writer, abort bool) ([]string, error) {
 	found := make([]string, 0)
 
