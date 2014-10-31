@@ -38,6 +38,7 @@ func main() {
 	root := args[0]
 	rest := args[1:]
 	cmd := exec.Command(root, rest...)
+	cmd.Stdin = os.Stdin
 
 	found, err := triggerfail.RunCommand(cmd, Triggers, os.Stdout, os.Stderr, OptAbort)
 	if OptVerbose && len(found) != 0 {
