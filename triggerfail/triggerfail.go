@@ -8,7 +8,7 @@ import (
 
 // Run a command, checking if triggers were found in it's output.
 // It returns a list of triggers found in the stdout and stderr of the running command.
-// This command takes the following arguments:
+// It takes the following arguments:
 //   cmd      *exec.Cmd - a pointer to an exec.Cmd (usually created by the exec.Command func). It can be configured as usual with the exception of stdin and stdout which should be left as is.
 //   triggers []string  - A list of trigger strings. The command will be failed if it's stdout or stderr contains these strings.
 //   stdout   io.Writer - After consuming the stdout of the command to check for triggers, we pass along the results to this writer. Usually it would be set to os.Stdout or os.DevNull
