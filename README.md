@@ -1,7 +1,7 @@
 TriggerFail
 ===========
 
-Fail a command with an exit status of 1 if a trigger string appears in it's output. This is incredibly useful for use with Travis CI testing framwork, which will let you fail a test if certain keywords like "Error" or "Warning" appears in it's output.
+Fail a command with an exit status of 1 if a trigger string appears in it's output. This is incredibly useful for use with testing framworks (such as Travis CI), which will let you fail a test if certain keywords like "Error" or "Warning" appears in it's output.
 
 ```sh
 USAGE
