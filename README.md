@@ -11,7 +11,6 @@ OPTIONS
   -abort=false: Abort a running command if a match is found. If abort is not passed the command is allowed to run to completion
   -v=false: Verbose. Print the reason why we failed the command.
 
-EXAMPLES
-  triggerfail "fail" echo "This will fail since it contains a keyword. Exit status will be 1."
-  triggerfail --abort -v "Error Warning" mysqldump my_database > mysqlbackup.sql
+EXAMPLE
+  triggerfail --abort -v "Error Warning" mysqldump my_database > mysqlbackup.sql #Abort a running mysqldump if we encounter a warning or error.
 ```
