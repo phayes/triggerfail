@@ -13,5 +13,5 @@ OPTIONS
 
 EXAMPLES
   triggerfail "fail" echo "This will fail since it contains a keyword. Exit status will be 1."
-  triggerfail --abort -v "Error Warning" mysql -u root my_database mysqlbackup.sql
+  triggerfail --abort -v "Error Warning" mysqldump my_database > mysqlbackup.sql
 ```
