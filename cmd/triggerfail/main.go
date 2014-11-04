@@ -26,8 +26,8 @@ func Usage() {
 	fmt.Println("OPTIONS")
 	flag.PrintDefaults()
 	fmt.Println("\nEXAMPLES")
-	fmt.Println("  triggerfail \"error ERROR warning\" --abort drush hw-atomload circae")
-	fmt.Println("  triggerfail \"hoot\" -v echo \"I don't give a hoot\"")
+	fmt.Println("  triggerfail --abort \"error ERROR warning\" drush hw-atomload circae")
+	fmt.Println("  triggerfail -v \"hoot\" echo \"I don't give a hoot\"")
 	os.Exit(0)
 }
 
