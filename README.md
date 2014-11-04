@@ -12,6 +12,6 @@ OPTIONS
   -v=false: Verbose. Print the reason why we failed the command.
 
 EXAMPLES
-  triggerfail "error ERROR warning" --abort drush hw-atomload circae
-  triggerfail "hoot" -v echo "I don't give a hoot"
+  triggerfail "hoot" echo "I don't give a hoot"
+  triggerfail --abort -v "error ERROR warning" drush hw-atomload circae
 ```
