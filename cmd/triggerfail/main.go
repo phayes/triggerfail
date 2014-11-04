@@ -19,24 +19,37 @@ var (
 	Failed     bool
 )
 
+func Usage() {
+	fmt.Println("triggerfail - fail a command with an exit status of 1 if a string appears in it's output (either stderr or stdout)\n")
+	fmt.Println("USAGE")
+	fmt.Println("  triggerfail \"<space-seperated-strings>\" [--abort] [-v] <command>\n")
+	fmt.Println("OPTIONS")
+	flag.PrintDefaults()
+	fmt.Println("\nEXAMPLES")
+	fmt.Println("  triggerfail \"error ERROR warning\" --abort drush hw-atomload circae")
+	fmt.Println("  triggerfail \"hoot\" -v echo \"I don't give a hoot\"")
+	os.Exit(0)
+}
+
 func main() {
-	flag.StringVar(&OptTrigger, "match", "", "Space seperate strings to match. If a match is found the exit code will be 0")
 	flag.BoolVar(&OptAbort, "abort", false, "Abort a running command if a match is found. If abort is not passed the command is allowed to run to completion")
 	flag.BoolVar(&OptVerbose, "v", false, "Verbose. Print the reason why we failed the command.")
+	flag.Usage = Usage
 	flag.Parse()
-
-	// Parse the triggers
-	Triggers = strings.Split(OptTrigger, " ")
 
 	args := flag.Args()
 
-	if len(args) == 0 {
-		fmt.Println("triggerfail let's you fail a program with an exit status of 1 if a string appears in it's output (either stderr or stdout). Use `checkfail --help` to see a list of available options.")
+	if len(args) <= 1 {
+		Usage()
 		os.Exit(0)
 	}
 
-	root := args[0]
-	rest := args[1:]
+	// Parse the triggers
+	Triggers = strings.Split(args[0], " ")
+
+	// Parse the command to run
+	root := args[1]
+	rest := args[2:]
 	cmd := exec.Command(root, rest...)
 	cmd.Stdin = os.Stdin
 
