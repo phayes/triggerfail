@@ -14,3 +14,7 @@ OPTIONS
 EXAMPLE
   triggerfail --abort -v "Error Warning" mysqldump my_database > mysqlbackup.sql #Abort a running mysqldump if we encounter a warning or error.
 ```
+
+###Downloads
+ - Linux: https://phayes.github.io/bin/current/triggerfail/linux/triggerfail
+ - Mac:   https://phayes.github.io/bin/current/triggerfail/mac/triggerfail
