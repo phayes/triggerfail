@@ -15,6 +15,13 @@ EXAMPLE
   triggerfail --abort -v "Error Warning" mysqldump my_database > mysqlbackup.sql #Abort a running mysqldump if we encounter a warning or error.
 ```
 
-###Downloads
+####Downloads
  - Linux: https://phayes.github.io/bin/current/triggerfail/linux/triggerfail.gz
  - Mac:   https://phayes.github.io/bin/current/triggerfail/mac/triggerfail.gz
+
+#### Building From Source
+```bash
+sudo apt-get install golang                    # Download go. Alternativly build from source: https://golang.org/doc/install/source
+mkdir ~/.gopath && export GOPATH=~/.gopath     # Replace with desired GOPATH
+export PATH=$PATH:$GOPATH/bin                  # For convenience, add go's bin dir to your PATH
+go get github.com/phayes/triggerfail/cmd/triggerfail
