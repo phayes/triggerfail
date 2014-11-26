@@ -16,5 +16,5 @@ EXAMPLE
 ```
 
 ###Downloads
- - Linux: https://phayes.github.io/bin/current/triggerfail/linux/triggerfail
- - Mac:   https://phayes.github.io/bin/current/triggerfail/mac/triggerfail
+ - Linux: https://phayes.github.io/bin/current/triggerfail/linux/triggerfail.gz
+ - Mac:   https://phayes.github.io/bin/current/triggerfail/mac/triggerfail.gz
