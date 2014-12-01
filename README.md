@@ -1,7 +1,7 @@
 TriggerFail
 ===========
 
-Fail a command with an exit status of 1 if a trigger string appears in it's output
+Fail a command with an exit status of 1 if a trigger string appears in it's output. This is incredibly useful for use with testing framworks (such as Travis CI), which will let you fail a test if certain keywords like "Error" or "Warning" appears in it's output.
 
 ```sh
 USAGE
@@ -11,7 +11,17 @@ OPTIONS
   -abort=false: Abort a running command if a match is found. If abort is not passed the command is allowed to run to completion
   -v=false: Verbose. Print the reason why we failed the command.
 
-EXAMPLES
-  triggerfail "error ERROR warning" --abort drush hw-atomload circae
-  triggerfail "hoot" -v echo "I don't give a hoot"
+EXAMPLE
+  triggerfail --abort -v "Error Warning" mysqldump my_database > mysqlbackup.sql #Abort a running mysqldump if we encounter a warning or error.
 ```
+
+####Downloads
+ - Linux: https://phayes.github.io/bin/current/triggerfail/linux/triggerfail.gz
+ - Mac:   https://phayes.github.io/bin/current/triggerfail/mac/triggerfail.gz
+
+#### Building From Source
+```bash
+sudo apt-get install golang                    # Download go. Alternativly build from source: https://golang.org/doc/install/source
+mkdir ~/.gopath && export GOPATH=~/.gopath     # Replace with desired GOPATH
+export PATH=$PATH:$GOPATH/bin                  # For convenience, add go's bin dir to your PATH
+go get github.com/phayes/triggerfail/cmd/triggerfail
