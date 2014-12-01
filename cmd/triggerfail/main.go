@@ -25,9 +25,8 @@ func Usage() {
 	fmt.Println("  triggerfail \"<space-seperated-strings>\" [--abort] [-v] <command>\n")
 	fmt.Println("OPTIONS")
 	flag.PrintDefaults()
-	fmt.Println("\nEXAMPLES")
-	fmt.Println("  triggerfail --abort \"error ERROR warning\" drush hw-atomload circae")
-	fmt.Println("  triggerfail -v \"hoot\" echo \"I don't give a hoot\"")
+	fmt.Println("\nEXAMPLE")
+	fmt.Println("  triggerfail --abort -v \"Error Warning\" mysqldump my_database > mysqlbackup.sql")
 	os.Exit(0)
 }
 
