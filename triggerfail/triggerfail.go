@@ -1,27 +1,38 @@
 package triggerfail
 
 import (
+	"bufio"
+	"bytes"
 	"io"
 	"os/exec"
 	"strings"
+	"sync"
 )
 
-// Run a command, checking if triggers were found in it's output.
+// Options provides configuration for RunCommand.
+// An empty Options struct can be provided
+type Options struct {
+	Abort        bool      // Abort the running commmand if a trigger word is found. If set to false the command will be allowed to run to completion, even with triggers.
+	Stdout       io.Writer // After consuming the stdout of the command to check for triggers, we pass along the results to this writer. Usually it would be set to os.Stdout. If not set stdout will be discarded.
+	Stderr       io.Writer // After consuming the stderr of the command to check for triggers, we pass along the results to this writer. Usually it would be set to os.Stderr. If not set stderr will be discarded.
+	IgnoreStdOut bool      // Don't evaluate StdOut for triggers.
+	IgnoreStdErr bool      // Don't evaluate StdErr for triggers.
+}
+
+// RunCommand runs a command, checking if triggers were found in it's output.
 // It returns a list of triggers found in the stdout and stderr of the running command.
 // It takes the following arguments:
 //   cmd      *exec.Cmd - a pointer to an exec.Cmd (usually created by the exec.Command func). It can be configured as usual with the exception of stdin and stdout which should be left as is.
 //   triggers []string  - A list of trigger strings. The command will be failed if it's stdout or stderr contains these strings.
-//   stdout   io.Writer - After consuming the stdout of the command to check for triggers, we pass along the results to this writer. Usually it would be set to os.Stdout or os.DevNull
-//   stderr   io.Writer - After consuming the stderr of the command to check for triggers, we pass along the results to this writer. Usually it would be set to os.Stderr or os.DevNull
-//   abort    bool      - Abort the running commmand if a trigger word is found. If set to false the command will be allowed to run to completion, even with triggers.
-func RunCommand(cmd *exec.Cmd, triggers []string, stdout io.Writer, stderr io.Writer, abort bool) ([]string, error) {
-	found := make([]string, 0)
+//   opts     Options   - Provide various config options for running this command. See Options struct.
+func RunCommand(cmd *exec.Cmd, triggers []string, opts Options) ([]string, error) {
+	var found []string
 
-	stderrPipe, err := cmd.StderrPipe()
+	stdoutPipe, err := cmd.StdoutPipe()
 	if err != nil {
 		return found, err
 	}
-	stdoutPipe, err := cmd.StdoutPipe()
+	stderrPipe, err := cmd.StderrPipe()
 	if err != nil {
 		return found, err
 	}
@@ -30,79 +41,85 @@ func RunCommand(cmd *exec.Cmd, triggers []string, stdout io.Writer, stderr io.Wr
 		return found, err
 	}
 
-	// Collect stdout and stderr
-	stdoutbuff := make([]byte, 1024)
-	stderrbuff := make([]byte, 1024)
+	// When we are done, kill the process exactly once
+	var done sync.Once
 
-	cmd.Run()
+	// stdout
+	go func() {
+		stdoutScan := bufio.NewScanner(stdoutPipe)
+		stdoutScan.Split(scanLines)
 
-	for {
-		//@@TODO: Move this to buffio.Scanner and two seperate co-running go-routines
-
-		done := false
-
-		// stdout
-		n, err := stdoutPipe.Read(stdoutbuff)
-		if err != nil {
-			if err == io.EOF {
-				done = true
-			} else {
-				return found, err
+		for stdoutScan.Scan() {
+			if opts.Stdout != nil {
+				opts.Stdout.Write(stdoutScan.Bytes())
+				opts.Stdout.Write([]byte("\n"))
 			}
-		}
-		stdout.Write(stdoutbuff[:n])
-
-		// stderr
-		n, err = stderrPipe.Read(stderrbuff)
-		if err != nil {
-			if err == io.EOF {
-				done = true
-			} else {
-				return found, err
-			}
-		}
-		stderr.Write(stderrbuff[:n])
-
-		// If stdout contains a trigger, log it and possibly abort
-		for _, trigger := range triggers {
-			if strings.Contains(string(stdoutbuff), trigger) {
-				found = append(found, trigger) //@@TODO: mutex
-				if abort {
-					if !done {
-						cmd.Process.Kill() // abort the running command
+			if !opts.IgnoreStdOut {
+				// If stdout contains a trigger, log it and possibly abort
+				for _, trigger := range triggers {
+					if strings.Contains(stdoutScan.Text(), trigger) {
+						found = append(found, trigger)
+						if opts.Abort {
+							done.Do(func() { cmd.Process.Kill() }) // abort the running RunCommand
+							return
+						}
 					}
-					done = true
 				}
 			}
 		}
+	}()
 
-		// If stderr contains a trigger, log it and possibly abort
-		for _, trigger := range triggers {
-			if strings.Contains(string(stderrbuff), trigger) {
-				found = append(found, trigger) //@@TODO: mutex
-				if abort {
-					if !done {
-						cmd.Process.Kill() // abort the running command
+	// stderr
+	go func() {
+		stderrScan := bufio.NewScanner(stderrPipe)
+		stderrScan.Split(scanLines)
+
+		for stderrScan.Scan() {
+			if opts.Stderr != nil {
+				opts.Stderr.Write(stderrScan.Bytes())
+				opts.Stderr.Write([]byte("\n"))
+			}
+			if !opts.IgnoreStdErr {
+				// If stderr contains a trigger, log it and possibly abort
+				for _, trigger := range triggers {
+					if strings.Contains(stderrScan.Text(), trigger) {
+						found = append(found, trigger)
+						if opts.Abort {
+							done.Do(func() { cmd.Process.Kill() }) // abort the running RunCommand
+							return
+						}
 					}
-					done = true
 				}
 			}
 		}
-
-		if done {
-			break
-		}
-	}
+	}()
 
 	err = cmd.Wait()
 	if err != nil { // If we have an error abort everything
 		if err.Error() == "signal: killed" { // We killed the process intentionally, don't report the error
 			return found, nil
-		} else {
-			return found, err
 		}
+		return found, err
 	}
 
 	// Command complete
 	return found, nil
+}
+
+// scanLines is a split function for a Scanner that returns each line of
+// text, but without stripping of any trailing end-of-line marker.
+func scanLines(data []byte, atEOF bool) (advance int, token []byte, err error) {
+	if atEOF && len(data) == 0 {
+		return 0, nil, nil
+	}
+	if i := bytes.IndexByte(data, '\n'); i >= 0 {
+		// We have a full newline-terminated line.
+		return i + 1, data[0:i], nil
+	}
+	// If we're at EOF, we have a final, non-terminated line. Return it.
+	if atEOF {
+		return len(data), data, nil
+	}
+	// Request more data.
+	return 0, nil, nil
 }
