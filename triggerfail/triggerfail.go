@@ -44,8 +44,14 @@ func RunCommand(cmd *exec.Cmd, triggers []string, opts Options) ([]string, error
 	// When we are done, kill the process exactly once
 	var done sync.Once
 
+	// Waitgroup for goroutines
+	var wg sync.WaitGroup
+	wg.Add(2)
+
 	// stdout
 	go func() {
+		defer wg.Done()
+
 		stdoutScan := bufio.NewScanner(stdoutPipe)
 		stdoutScan.Split(scanLines)
 
@@ -54,6 +60,7 @@ func RunCommand(cmd *exec.Cmd, triggers []string, opts Options) ([]string, error
 				opts.Stdout.Write(stdoutScan.Bytes())
 				opts.Stdout.Write([]byte("\n"))
 			}
+
 			if !opts.IgnoreStdOut {
 				// If stdout contains a trigger, log it and possibly abort
 				for _, trigger := range triggers {
@@ -71,6 +78,8 @@ func RunCommand(cmd *exec.Cmd, triggers []string, opts Options) ([]string, error
 
 	// stderr
 	go func() {
+		defer wg.Done()
+
 		stderrScan := bufio.NewScanner(stderrPipe)
 		stderrScan.Split(scanLines)
 
@@ -93,6 +102,8 @@ func RunCommand(cmd *exec.Cmd, triggers []string, opts Options) ([]string, error
 			}
 		}
 	}()
+
+	wg.Wait()
 
 	err = cmd.Wait()
 	if err != nil { // If we have an error abort everything
