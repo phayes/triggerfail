@@ -41,7 +41,7 @@ func main() {
 	flag.BoolVar(&OptStdErr, "stderr", false, "Only examine stderr for triggers.")
 	flag.BoolVar(&OptStdOut, "stdout", false, "Only examine stdout for triggers.")
 
-	flag.Usage = Usage
+	flag.Usage = usage
 	flag.Parse()
 
 	args := flag.Args()
