@@ -58,7 +58,6 @@ func RunCommand(cmd *exec.Cmd, triggers []string, opts Options) ([]string, error
 		for stdoutScan.Scan() {
 			if opts.Stdout != nil {
 				opts.Stdout.Write(stdoutScan.Bytes())
-				opts.Stdout.Write([]byte("\n"))
 			}
 
 			if !opts.IgnoreStdOut {
@@ -86,7 +85,6 @@ func RunCommand(cmd *exec.Cmd, triggers []string, opts Options) ([]string, error
 		for stderrScan.Scan() {
 			if opts.Stderr != nil {
 				opts.Stderr.Write(stderrScan.Bytes())
-				opts.Stderr.Write([]byte("\n"))
 			}
 			if !opts.IgnoreStdErr {
 				// If stderr contains a trigger, log it and possibly abort
@@ -125,7 +123,7 @@ func scanLines(data []byte, atEOF bool) (advance int, token []byte, err error) {
 	}
 	if i := bytes.IndexByte(data, '\n'); i >= 0 {
 		// We have a full newline-terminated line.
-		return i + 1, data[0:i], nil
+		return i + 1, data[:i+1], nil
 	}
 	// If we're at EOF, we have a final, non-terminated line. Return it.
 	if atEOF {

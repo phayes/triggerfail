@@ -22,7 +22,7 @@ var (
 	Failed     bool
 )
 
-func Usage() {
+func usage() {
 	fmt.Println("triggerfail - fail a command with an exit status of 1 if a string appears in it's output (either stderr or stdout)")
 	fmt.Println("")
 	fmt.Println("USAGE")
@@ -41,7 +41,7 @@ func main() {
 	flag.BoolVar(&OptStdErr, "stderr", false, "Only examine stderr for triggers.")
 	flag.BoolVar(&OptStdOut, "stdout", false, "Only examine stdout for triggers.")
 
-	flag.Usage = Usage
+	flag.Usage = usage
 	flag.Parse()
 
 	args := flag.Args()
@@ -97,6 +97,6 @@ func main() {
 	if len(found) == 0 {
 		os.Exit(0)
 	} else {
-		os.Exit(1)
+		os.Exit(82)
 	}
 }
