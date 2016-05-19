@@ -6,6 +6,6 @@ go:
  - 1.5
  - 1.6
 script:
-    - cd triggerfail && go test -race
+ - cd triggerfail && go test -race
 notifications:
-  email: false
+ email: false
