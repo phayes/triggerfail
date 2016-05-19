@@ -14,7 +14,7 @@ OPTIONS
   -v=false: Verbose. Print the reason why we failed the command.
 
 EXAMPLE
-  triggerfail --abort -v "Error Warning" mysqldump my_database > mysqlbackup.sql #Abort a running mysqldump if we encounter a warning or error.
+  triggerfail --abort -v --stderr "Error Warning" mysqldump my_database > mysqlbackup.sql #Abort a running mysqldump if we encounter a warning or error.
 ```
 
 ####Downloads
